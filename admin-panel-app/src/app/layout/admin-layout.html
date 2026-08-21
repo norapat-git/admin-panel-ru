@@ -1,0 +1,171 @@
+<div class="admin-wrapper" [class.sidebar-collapsed]="isSidebarCollapsed()">
+  <!-- Top Navbar -->
+  <header class="top-navbar">
+    <div class="navbar-brand">
+      <a routerLink="/dashboard" class="brand-logo">
+        <span class="brand-e">E-</span><span class="brand-testing">Testing</span> <span class="brand-backend">Backend</span>
+      </a>
+    </div>
+    
+    <div class="navbar-actions">
+      <button type="button" class="btn-toggle-sidebar" (click)="toggleSidebar()" title="ย่อ/ขยายเมนู">
+        <i class="bi bi-list"></i>
+      </button>
+
+      <div class="navbar-right">
+        <div class="user-info">
+          <span class="user-badge">
+            <i class="bi bi-person-circle"></i> 
+            {{ authService.currentUser()?.name || 'ผู้ดูแลระบบ (Admin)' }}
+          </span>
+          <button type="button" class="btn-logout" (click)="logout()" title="ออกจากระบบ">
+            <i class="bi bi-box-arrow-right"></i> ออกจากระบบ
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="main-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <!-- Home Control panel -->
+        <a routerLink="/dashboard" routerLinkActive="active" class="nav-item home-item">
+          <i class="bi bi-display"></i>
+          <span class="nav-text">Home Control panel</span>
+        </a>
+
+        <!-- Section Header -->
+        <div class="nav-section-title">
+          <i class="bi bi-arrow-return-right"></i> SEAT MANAGEMENTS
+        </div>
+
+        <!-- Collapsible Menu: จัดสอบที่มหาวิทยาลัย -->
+        <div class="nav-group">
+          <button type="button" class="nav-group-header" (click)="toggleSeatMenu()" [class.open]="isSeatMenuOpen()">
+            <div class="nav-group-title">
+              <i class="bi bi-stack"></i>
+              <span class="nav-text">จัดสอบที่มหาวิทยาลัย</span>
+            </div>
+            <i class="bi bi-chevron-down arrow-icon" [class.rotated]="!isSeatMenuOpen()"></i>
+          </button>
+
+          <div class="nav-group-content" [class.collapsed]="!isSeatMenuOpen()">
+            
+            <!-- 1. จัดการ กำหนดการสอบ -->
+            <div class="sub-section-title">
+              <strong>จัดการ กำหนดการสอบ</strong>
+            </div>
+
+            <a routerLink="/exam-setting/academic-year" routerLinkActive="active" class="sub-nav-item">
+              <i class="bi bi-calendar3"></i>
+              <span>กำหนดปี/ภาค การศึกษา</span>
+            </a>
+
+            <a routerLink="/exam-setting/subjects" routerLinkActive="active" class="sub-nav-item">
+              <i class="bi bi-journal-text"></i>
+              <span>กำหนด วิชาที่เปิดสอบ</span>
+            </a>
+
+            <a routerLink="/exam-setting/exam-rows" routerLinkActive="active" class="sub-nav-item">
+              <i class="bi bi-list-columns-reverse"></i>
+              <span>กำหนด แถวสอบ</span>
+            </a>
+
+            <a routerLink="/exam-setting/exam-schedule" routerLinkActive="active" class="sub-nav-item">
+              <i class="bi bi-calendar-check"></i>
+              <span>กำหนดวันสอบ-คาบสอบ</span>
+            </a>
+
+            <!-- 2. รายชื่อลงทะเบียน -->
+            <div class="sub-section-title divider-top">
+              <strong>รายชื่อลงทะเบียน</strong>
+            </div>
+
+            <a routerLink="/registration/all" routerLinkActive="active" class="sub-nav-item">
+              <i class="bi bi-person-lines-fill"></i>
+              <span>รายชื่อลงทะเบียนทั้งหมด</span>
+            </a>
+
+            <a routerLink="/registration/paid" routerLinkActive="active" class="sub-nav-item">
+              <i class="bi bi-person-check-fill"></i>
+              <span>รายชื่อลงทะเบียน ชำระเงินแล้ว</span>
+            </a>
+
+            <a routerLink="/registration/by-schedule" routerLinkActive="active" class="sub-nav-item">
+              <i class="bi bi-journal-text"></i>
+              <span>จำนวนนักศึกษาที่ลงทะเบียน/ตามวันสอบ-คาบสอบ</span>
+            </a>
+
+            <a routerLink="/registration/special-students" routerLinkActive="active" class="sub-nav-item">
+              <i class="bi bi-journal-text"></i>
+              <span>จำนวนนักศึกษาพิเศษ/ตามวันสอบ-คาบสอบ</span>
+            </a>
+
+            <!-- 3. รายงานการเงิน -->
+            <div class="sub-section-title divider-top">
+              <strong>รายงานการเงิน</strong>
+            </div>
+
+            <a routerLink="/finance/payment-status" routerLinkActive="active" class="sub-nav-item">
+              <i class="bi bi-cash-stack"></i>
+              <span>สถานะการชำระเงิน</span>
+            </a>
+
+            <a routerLink="/finance/daily-summary" routerLinkActive="active" class="sub-nav-item">
+              <i class="bi bi-file-earmark-text"></i>
+              <span>พิมพ์สรุปเงินรายวัน</span>
+            </a>
+
+            <a routerLink="/finance/daily-total" routerLinkActive="active" class="sub-nav-item">
+              <i class="bi bi-file-earmark-text"></i>
+              <span>พิมพ์สรุปเงินรวมรายวัน</span>
+            </a>
+
+            <a routerLink="/finance/grand-total" routerLinkActive="active" class="sub-nav-item">
+              <i class="bi bi-file-earmark-text"></i>
+              <span>พิมพ์สรุปเงินรวมทั้งหมด</span>
+            </a>
+
+            <!-- 4. จัดที่นั่งสอบ -->
+            <div class="sub-section-title divider-top">
+              <strong>จัดที่นั่งสอบ</strong>
+            </div>
+
+            <a routerLink="/seat-allocation/manage" routerLinkActive="active" class="sub-nav-item">
+              <i class="bi bi-list-task"></i>
+              <span>จัดที่นั่งสอบ</span>
+            </a>
+
+            <!-- 5. ดาวน์โหลดไฟล์ -->
+            <div class="sub-section-title divider-top">
+              <strong>ดาวน์โหลดไฟล์</strong>
+            </div>
+
+            <a routerLink="/download/subjects" routerLinkActive="active" class="sub-nav-item">
+              <i class="bi bi-file-earmark-text"></i>
+              <span>ดาวน์โหลด วิชาที่เปิดสอบ</span>
+            </a>
+
+            <a routerLink="/download/et-stdc" routerLinkActive="active" class="sub-nav-item">
+              <i class="bi bi-file-earmark-text"></i>
+              <span>ดาวน์โหลด ET_STDC</span>
+            </a>
+
+            <a routerLink="/download/ru25et" routerLinkActive="active" class="sub-nav-item">
+              <i class="bi bi-file-earmark-text"></i>
+              <span>ดาวน์โหลด RU25et</span>
+            </a>
+
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="content-area">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

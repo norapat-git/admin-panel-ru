@@ -1,0 +1,70 @@
+<div class="login-container">
+  <div class="login-card">
+    <!-- Logo & Header -->
+    <div class="login-header">
+      <div class="brand-logo">
+        <span class="brand-e">E-</span><span class="brand-testing">Testing</span> <span class="brand-backend">Backend</span>
+      </div>
+      <h2>ระบบจัดการหลังบ้าน (Admin Panel)</h2>
+      <p class="subtitle">กรุณาเข้าสู่ระบบเพื่อจัดการข้อมูลและที่นั่งสอบ</p>
+    </div>
+
+    @if (errorMessage()) {
+      <div class="error-banner">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        <span>{{ errorMessage() }}</span>
+      </div>
+    }
+
+    <!-- Login Form -->
+    <form (ngSubmit)="onLogin()" class="login-form">
+      <div class="form-group">
+        <label for="username"><i class="bi bi-person"></i> ชื่อผู้ใช้งาน (Username):</label>
+        <input 
+          id="username"
+          type="text" 
+          [(ngModel)]="username" 
+          name="username" 
+          placeholder="เช่น admin" 
+          class="form-control"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password"><i class="bi bi-lock"></i> รหัสผ่าน (Password):</label>
+        <input 
+          id="password"
+          type="password" 
+          [(ngModel)]="password" 
+          name="password" 
+          placeholder="••••••••" 
+          class="form-control"
+          required
+        />
+      </div>
+
+      <div class="form-options">
+        <label class="remember-me">
+          <input type="checkbox" checked />
+          <span>จดจำการเข้าสู่ระบบ</span>
+        </label>
+        <span class="jwt-badge"><i class="bi bi-shield-lock"></i> JWT Secure</span>
+      </div>
+
+      <button type="submit" class="btn-submit" [disabled]="isSubmitting()">
+        @if (isSubmitting()) {
+          <span class="spinner"></span>
+          <span>กำลังตรวจสอบ JWT...</span>
+        } @else {
+          <i class="bi bi-box-arrow-in-right"></i>
+          <span>เข้าสู่ระบบ</span>
+        }
+      </button>
+    </form>
+
+    <div class="login-footer">
+      <p class="hint-text"><i class="bi bi-info-circle"></i> ทดสอบเข้าระบบ: Username: <code>admin</code> | Password: <code>admin</code></p>
+    </div>
+  </div>
+</div>

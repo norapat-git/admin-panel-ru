@@ -1,0 +1,312 @@
+<div class="page-card">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-title">
+      <i class="bi bi-journal-bookmark-fill title-icon"></i>
+      <h1>จัดการวิชาที่เปิดสอบ</h1>
+    </div>
+    
+    <div class="header-actions">
+      <button type="button" class="btn btn-outline" (click)="toggleLoading()">
+        <i class="bi" [ngClass]="isLoading() ? 'bi-toggle-on text-primary' : 'bi-toggle-off'"></i>
+        <span>{{ isLoading() ? 'จำลอง: กำลังโหลด (Skeleton)' : 'จำลอง: แสดงโครงหน้า' }}</span>
+      </button>
+      <button type="button" class="btn btn-primary" (click)="openAddModal()">
+        <i class="bi bi-plus-circle"></i> เพิ่มวิชาเปิดสอบ
+      </button>
+    </div>
+  </div>
+
+  <hr class="header-divider" />
+
+  <!-- Active Term Banner (Matching screenshot) -->
+  <div class="term-alert-banner">
+    <i class="bi bi-exclamation-triangle-fill alert-icon"></i>
+    <span class="alert-text">ปี/ภาคการศึกษาปัจจุบัน <strong>{{ currentTerm() }}</strong></span>
+  </div>
+
+  @if (isLoading()) {
+    <!-- SKELETON LOADING VIEW -->
+    <div class="skeleton-view">
+      <div class="skeleton-controls-bar">
+        <div class="skeleton" style="width: 140px; height: 32px; border-radius: 4px;"></div>
+        <div class="skeleton" style="width: 220px; height: 32px; border-radius: 4px;"></div>
+      </div>
+
+      <div class="skeleton-table-wrapper">
+        <div class="skeleton-table-header skeleton"></div>
+        @for (item of [1, 2, 3, 4, 5]; track item) {
+          <div class="skeleton-table-row">
+            <div class="skeleton" style="width: 40px; height: 16px;"></div>
+            <div class="skeleton" style="width: 100px; height: 16px;"></div>
+            <div class="skeleton" style="width: 220px; height: 16px;"></div>
+            <div class="skeleton" style="width: 50px; height: 16px;"></div>
+            <div class="skeleton" style="width: 90px; height: 16px;"></div>
+            <div class="skeleton" style="width: 70px; height: 24px; border-radius: 4px;"></div>
+          </div>
+        }
+      </div>
+
+      <div class="skeleton-footer">
+        <div class="skeleton" style="width: 180px; height: 16px;"></div>
+        <div class="skeleton" style="width: 240px; height: 32px; border-radius: 4px;"></div>
+      </div>
+    </div>
+  } @else {
+
+  <!-- Data Table Filter Bar -->
+  <div class="table-controls">
+    <div class="entries-selector">
+      <span>Show</span>
+      <select [value]="pageSize()" (change)="onPageSizeChange($event)" class="form-select-sm">
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select>
+      <span>entries</span>
+    </div>
+
+    <div class="search-box">
+      <label for="searchInput" class="search-label">ค้นหา:</label>
+      <div class="input-with-icon">
+        <i class="bi bi-search search-icon"></i>
+        <input 
+          id="searchInput"
+          type="text" 
+          [value]="searchTerm()" 
+          (input)="onSearchChange($event)"
+          placeholder="พิมพ์รหัสวิชา, ชื่อวิชา..." 
+          class="form-control-sm"
+        />
+        @if (searchTerm()) {
+          <button class="btn-clear" (click)="searchTerm.set(''); currentPage.set(1)" title="ล้างการค้นหา">
+            <i class="bi bi-x"></i>
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Data Table -->
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th class="col-seq" (click)="setSort('sequenceNo')">
+            <div class="th-content">
+              <span>ลำดับ</span>
+              <span class="sort-indicator">
+                @if (sortColumn() === 'sequenceNo') {
+                  <i class="bi" [ngClass]="sortDirection() === 'asc' ? 'bi-caret-up-fill' : 'bi-caret-down-fill'"></i>
+                } @else {
+                  <i class="bi bi-arrow-down-up text-muted"></i>
+                }
+              </span>
+            </div>
+          </th>
+
+          <th class="col-code" (click)="setSort('subjectCode')">
+            <div class="th-content">
+              <span>รหัสวิชา</span>
+              <span class="sort-indicator">
+                @if (sortColumn() === 'subjectCode') {
+                  <i class="bi" [ngClass]="sortDirection() === 'asc' ? 'bi-caret-up-fill' : 'bi-caret-down-fill'"></i>
+                } @else {
+                  <i class="bi bi-arrow-down-up text-muted"></i>
+                }
+              </span>
+            </div>
+          </th>
+
+          <th class="col-name" (click)="setSort('subjectName')">
+            <div class="th-content">
+              <span>ชื่อวิชา</span>
+              <span class="sort-indicator">
+                @if (sortColumn() === 'subjectName') {
+                  <i class="bi" [ngClass]="sortDirection() === 'asc' ? 'bi-caret-up-fill' : 'bi-caret-down-fill'"></i>
+                } @else {
+                  <i class="bi bi-arrow-down-up text-muted"></i>
+                }
+              </span>
+            </div>
+          </th>
+
+          <th class="col-credits" (click)="setSort('credits')">
+            <div class="th-content text-center">
+              <span>หน่วยกิต</span>
+              <span class="sort-indicator">
+                @if (sortColumn() === 'credits') {
+                  <i class="bi" [ngClass]="sortDirection() === 'asc' ? 'bi-caret-up-fill' : 'bi-caret-down-fill'"></i>
+                } @else {
+                  <i class="bi bi-arrow-down-up text-muted"></i>
+                }
+              </span>
+            </div>
+          </th>
+
+          <th class="col-faculty">คณะ</th>
+          <th class="col-type">รูปแบบ</th>
+          <th class="col-status text-center">สถานะ</th>
+          <th class="col-actions text-center">จัดการ</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (pagedSubjects().length === 0) {
+          <tr>
+            <td colspan="8" class="text-center py-4 no-data">
+              <i class="bi bi-inbox text-muted fs-3"></i>
+              <p class="mt-2 text-muted">ไม่พบข้อมูลวิชาที่ค้นหา</p>
+            </td>
+          </tr>
+        } @else {
+          @for (item of pagedSubjects(); track item.id) {
+            <tr class="table-row">
+              <td class="text-center">{{ item.sequenceNo }}</td>
+              <td class="subject-code-cell">
+                <strong>{{ item.subjectCode }}</strong>
+              </td>
+              <td>{{ item.subjectName }}</td>
+              <td class="text-center">{{ item.credits }}</td>
+              <td><span class="badge-faculty">{{ item.faculty }}</span></td>
+              <td><span class="badge-type">{{ item.examType }}</span></td>
+              <td class="text-center">
+                <span class="status-badge" [class.open]="item.status === 'เปิดสอบ'">
+                  {{ item.status }}
+                </span>
+              </td>
+              <td class="text-center actions-cell">
+                <button type="button" class="btn-action edit" (click)="openEditModal(item)" title="แก้ไข">
+                  <i class="bi bi-pencil-square"></i>
+                </button>
+                <button type="button" class="btn-action delete" (click)="deleteSubject(item.id, item.subjectCode)" title="ลบ">
+                  <i class="bi bi-trash3"></i>
+                </button>
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination & Info Bar -->
+  <div class="table-footer">
+    <div class="footer-info">
+      Showing {{ startEntryIndex() }} to {{ endEntryIndex() }} of {{ filteredCount() }} entries
+      @if (filteredCount() !== totalCount()) {
+        <span>(filtered from {{ totalCount() }} total entries)</span>
+      }
+    </div>
+
+    <div class="pagination-container">
+      <button 
+        type="button" 
+        class="page-btn" 
+        [disabled]="currentPage() === 1" 
+        (click)="goToPage(currentPage() - 1)">
+        <i class="bi bi-chevron-left"></i> ย้อนกลับ
+      </button>
+
+      <div class="page-numbers">
+        @for (p of [].constructor(totalPages()); track $index; let idx = $index) {
+          <button 
+            type="button" 
+            class="page-number-btn" 
+            [class.active]="currentPage() === (idx + 1)"
+            (click)="goToPage(idx + 1)">
+            {{ idx + 1 }}
+          </button>
+        }
+      </div>
+
+      <button 
+        type="button" 
+        class="page-btn" 
+        [disabled]="currentPage() === totalPages() || totalPages() === 0" 
+        (click)="goToPage(currentPage() + 1)">
+        ถัดไป <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+  }
+</div>
+
+<!-- Modal: Add / Edit Subject -->
+@if (isModalOpen()) {
+  <div class="modal-backdrop" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>
+          <i class="bi" [ngClass]="isEditMode() ? 'bi-pencil-square' : 'bi-plus-circle'"></i>
+          {{ isEditMode() ? 'แก้ไขข้อมูลวิชาเปิดสอบ' : 'เพิ่มวิชาเปิดสอบใหม่' }}
+        </h3>
+        <button type="button" class="btn-close-modal" (click)="closeModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group col-4">
+            <label>ลำดับ (Sequence):</label>
+            <input type="number" [(ngModel)]="modalSubject().sequenceNo" class="form-input" />
+          </div>
+          <div class="form-group col-8">
+            <label>รหัสวิชา (Subject Code): <span class="text-danger">*</span></label>
+            <input type="text" [(ngModel)]="modalSubject().subjectCode" placeholder="เช่น RAM1202, THA1003" class="form-input text-uppercase" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>ชื่อวิชา (Subject Name):</label>
+          <input type="text" [(ngModel)]="modalSubject().subjectName" placeholder="เช่น ทักษะทางดิจิทัล..." class="form-input" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-4">
+            <label>หน่วยกิต:</label>
+            <input type="number" [(ngModel)]="modalSubject().credits" class="form-input" min="1" max="9" />
+          </div>
+          <div class="form-group col-8">
+            <label>คณะที่รับผิดชอบ:</label>
+            <select [(ngModel)]="modalSubject().faculty" class="form-input">
+              <option value="ศึกษาศาสตร์">ศึกษาศาสตร์</option>
+              <option value="มนุษยศาสตร์">มนุษยศาสตร์</option>
+              <option value="วิทยาศาสตร์">วิทยาศาสตร์</option>
+              <option value="นิติศาสตร์">นิติศาสตร์</option>
+              <option value="บริหารธุรกิจ">บริหารธุรกิจ</option>
+              <option value="รัฐศาสตร์">รัฐศาสตร์</option>
+              <option value="เศรษฐศาสตร์">เศรษฐศาสตร์</option>
+              <option value="ส่วนกลาง">ส่วนกลาง</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-6">
+            <label>รูปแบบการสอบ:</label>
+            <select [(ngModel)]="modalSubject().examType" class="form-input">
+              <option value="e-Testing">e-Testing</option>
+              <option value="Paper-Based">Paper-Based</option>
+              <option value="Hybrid">Hybrid</option>
+            </select>
+          </div>
+          <div class="form-group col-6">
+            <label>สถานะ:</label>
+            <select [(ngModel)]="modalSubject().status" class="form-input">
+              <option value="เปิดสอบ">เปิดสอบ</option>
+              <option value="ปิดรับ">ปิดรับ</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">ยกเลิก</button>
+        <button type="button" class="btn btn-primary" (click)="saveSubject()">
+          <i class="bi bi-check-lg"></i> บันทึกข้อมูล
+        </button>
+      </div>
+    </div>
+  </div>
+}
